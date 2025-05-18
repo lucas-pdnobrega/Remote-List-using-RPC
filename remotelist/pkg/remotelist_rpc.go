@@ -34,12 +34,12 @@ func HandleErr(err error) {
 }
 
 func (l *RemoteList) CreateLogFile(_ *struct{}, reply *bool) error {
-	fmt.Printf("Creating log file...")
-	fileName := "log.json"
-	path := fmt.Sprintf("%s/%s", l.file_path, fileName)
-	
 	l.mu.Lock()
 	defer l.mu.Unlock()
+
+	fmt.Printf("Creating log file...")
+	fileName := "log.json"
+	path := fmt.Sprintf("%s/%s", l.file_path, fileName)	
 
 	data, err := json.MarshalIndent(l.list, "", "	")
 	HandleErr(err)
