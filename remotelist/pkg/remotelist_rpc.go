@@ -8,6 +8,16 @@ import (
 	"encoding/json"
 )
 
+type AppendArgs struct {
+	ListID int
+	Value  int
+}
+
+type GetArgs struct {
+	ListID int
+	Index  int
+}
+
 type RemoteList struct {
 	file_path string
 	mu   sync.Mutex
@@ -71,17 +81,17 @@ func (l *RemoteList) CreateList( reply *bool) error {
 	return nil
 }
 
-func (l *RemoteList) RemoveList( index int, reply *[]int) error {
+func (l *RemoteList) RemoveList( Index int, reply *[]int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if index < 0 || index >= len(l.list) {
-		return errors.New("index out of range")
+	if Index < 0 || Index >= len(l.list) {
+		return errors.New("Index out of range")
 	}
 
 	if l.size > 0 {
-		*reply = l.list[index]
-		l.list = append(l.list[:index], l.list[index + 1:]...)
+		*reply = l.list[Index]
+		l.list = append(l.list[:Index], l.list[Index + 1:]...)
 		l.size--
 		fmt.Println(l.list)
 	} else {
@@ -91,52 +101,52 @@ func (l *RemoteList) RemoveList( index int, reply *[]int) error {
 }
 
 
-func (l *RemoteList) Get(list_id int, item_index int, reply *int) error {
+func (l *RemoteList) Get(args *GetArgs, reply *int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if list_id < 0 || list_id >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", list_id)
+	if args.ListID < 0 || args.ListID >= len(l.list) {
+		return fmt.Errorf("Index %d out of list range", args.ListID)
 	}
 
-	if item_index < 0 || item_index >= len(l.list[list_id]) {
-		return fmt.Errorf("index %d out of list %d range", item_index, list_id)
+	if args.Index < 0 || args.Index >= len(l.list[args.ListID]) {
+		return fmt.Errorf("Index %d out of list %d range", args.Index, args.ListID)
 	}
 
-	*reply = l.list[list_id][item_index]
+	*reply = l.list[args.ListID][args.Index]
 
 	return nil
 }
 
-func (l *RemoteList) Append(list_id int, v int, reply *bool) error {
+func (l *RemoteList) Append(args *AppendArgs, reply *bool) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if list_id < 0 || list_id >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", list_id)
+	if args.ListID < 0 || args.ListID >= len(l.list) {
+		return fmt.Errorf("Index %d out of list range", args.ListID)
 	}
 
-	sub_list := l.list[list_id]
+	sub_list := l.list[args.ListID]
 
-	l.list[list_id] = append(sub_list, v)
+	l.list[args.ListID] = append(sub_list, args.Value)
 	fmt.Println(l.list)
 	*reply = true
 	return nil
 }
 
-func (l *RemoteList) Remove(list_id int, reply *int) error {
+func (l *RemoteList) Remove(ListID int, reply *int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if list_id < 0 || list_id >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", list_id)
+	if ListID < 0 || ListID >= len(l.list) {
+		return fmt.Errorf("Index %d out of list range", ListID)
 	}
 
-	sub_list := l.list[list_id]
+	sub_list := l.list[ListID]
 
 	if len(sub_list) > 0 {
 		*reply = sub_list[len(sub_list)-1]
-		l.list[list_id] = sub_list[:len(sub_list)-1]
+		l.list[ListID] = sub_list[:len(sub_list)-1]
 		fmt.Println(l.list)
 	} else {
 		return errors.New("empty list")
@@ -144,15 +154,15 @@ func (l *RemoteList) Remove(list_id int, reply *int) error {
 	return nil
 }
 
-func (l *RemoteList) Size(list_id int, reply *int) error {
+func (l *RemoteList) Size(ListID int, reply *int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if list_id < 0 || list_id >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", list_id)
+	if ListID < 0 || ListID >= len(l.list) {
+		return fmt.Errorf("Index %d out of list range", ListID)
 	}
 
-	*reply = len(l.list[list_id])
+	*reply = len(l.list[ListID])
 
 	return nil
 }
