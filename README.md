@@ -1,13 +1,15 @@
+### Remote Integer List RPC Service
+This is an experiment in how to use Remote Procedure Calls to access a common 2-dimensional list array service. 
+It allows clients to create, modify, and query lists concurrently over TCP.
+
+
 <p align="center">
-   Stack Used
   <a href="https://skillicons.dev">
     <img src="https://skillicons.dev/icons?i=git,go,vscode" />
   </a>
 </p>
 
-### Remote Integer List RPC Service
-This is an experiment in how to use Remote Procedure Calls to access a common 2-dimensional list array service. 
-It allows clients to create, modify, and query lists concurrently over TCP.
+### Stack Used
 
 ### Features
 - Create and remove integer lists remotely
