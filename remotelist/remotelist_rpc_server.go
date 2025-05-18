@@ -10,7 +10,11 @@ import (
 func main() {
 	list := remotelist.NewRemoteList()
 	rpcs := rpc.NewServer()
-	rpcs.Register(list)
+	err := rpcs.RegisterName("RemoteList", list)
+	if err != nil {
+		fmt.Println("Erro ao registrar RemoteList:", err)
+	}
+
 	l, e := net.Listen("tcp", "[localhost]:5000")
 	defer l.Close()
 	if e != nil {

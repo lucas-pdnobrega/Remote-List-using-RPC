@@ -21,6 +21,8 @@ type GetArgs struct {
 	Index  int
 }
 
+type Void struct{}
+
 func main() {
 	client, err := rpc.Dial("tcp", ":5000")
 	if err != nil {
@@ -30,8 +32,9 @@ func main() {
 	var reply bool
 
 	fmt.Println("Inicializando duas listas...")
-	err = client.Call("RemoteList.CreateList", struct{}{}, &reply)
-	err = client.Call("RemoteList.CreateList", struct{}{}, &reply)
+	err = client.Call("RemoteList.CreateList", &Void{}, &reply)
+	fmt.Println(reply)
+	err = client.Call("RemoteList.CreateList", &Void{}, &reply)
 
 
 	fmt.Println("Realizando appends...")
@@ -62,14 +65,10 @@ func main() {
 	_ = client.Call("RemoteList.Remove", 0, &val)
 	fmt.Println("Valor:", val)
 	fmt.Println("\nRetirando último elemento da lista 1...")
-	_ = client.Call("RemoteList.RemoveList", 1, &list)
-	fmt.Println("Valor:", list)
+	_ = client.Call("RemoteList.Remove", 1, &val)
+	fmt.Println("Valor:", val)
 
 
 	fmt.Println("\nSalvando...")
-	_ = client.Call("RemoteList.CreateLogFile", struct{}{}, &ok)
-
-
-	fmt.Println("\nLendo...")
-	_ = client.Call("RemoteList.ReadLogFile", struct{}{}, &ok)
+	_ = client.Call("RemoteList.CreateLogFile", &Void{}, &ok)
 }
