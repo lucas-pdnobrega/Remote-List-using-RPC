@@ -31,7 +31,9 @@ State is thusly saved/loaded from a local JSON file (log.json), which supports m
 
 ### Usage
 - Run the server (from repository root)
-```go run .\remote_list_rpc_server.go```
+  
+    ```go run .\remote_list_rpc_server.go```
 
-- On a separate terminal instance, use the client (example provided) to run automatic interactions via RPC calls
-```go run .\remote_list_rpc_client.go```
+- On a separate terminal instance, run the client and observe the automatic interactions via RPC calls
+  
+    ```go run .\remote_list_rpc_client.go```
