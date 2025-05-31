@@ -27,7 +27,7 @@ type RemoteList struct {
 	size uint32
 }
 
-func HandleErr(err error) {
+func (l *RemoteList) HandleErr(err error) {
 	if err != nil {
 		panic(err)
 	}
@@ -42,10 +42,10 @@ func (l *RemoteList) CreateLogFile(_ *struct{}, reply *bool) error {
 	path := fmt.Sprintf("%s/%s", l.file_path, fileName)	
 
 	data, err := json.MarshalIndent(l.list, "", "	")
-	HandleErr(err)
+	l.HandleErr(err)
 
 	err = os.WriteFile(path, data, 0644)
-	HandleErr(err)
+	l.HandleErr(err)
 
 	fmt.Printf("Saved list to file: %s\n", path)
 	*reply = true
@@ -59,13 +59,13 @@ func (l *RemoteList) ReadLogFile() {
 	
 	if _, err := os.Stat(path); err == nil {
 		data, err := os.ReadFile(path)
-		HandleErr(err)
+		l.HandleErr(err)
 
 		l.mu.Lock()
 		defer l.mu.Unlock()
 
 		err = json.Unmarshal(data, &l.list)
-		HandleErr(err)
+		l.HandleErr(err)
 
 		l.size = uint32(len(l.list))
 
@@ -73,10 +73,10 @@ func (l *RemoteList) ReadLogFile() {
 		fmt.Println(l.list)
 	} else if errors.Is(err, os.ErrNotExist) {
 		data, err := json.MarshalIndent(l.list, "", "	")
-		HandleErr(err)
+		l.HandleErr(err)
 
 		err = os.WriteFile(path, data, 0644)
-		HandleErr(err)
+		l.HandleErr(err)
 		fmt.Printf("Created list on file: %s\n", path)
 	}
 
