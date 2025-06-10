@@ -1,6 +1,5 @@
 package remotelist
 
-
 type AppendArgs struct {
 	ListID int
 	Value  int

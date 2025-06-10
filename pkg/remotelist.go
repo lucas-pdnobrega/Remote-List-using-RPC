@@ -1,18 +1,19 @@
 package remotelist
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"sync"
-	"encoding/json"
+	"time"
 )
 
 type RemoteList struct {
 	file_path string
-	mu   sync.Mutex
-	list [][]int
-	size uint32
+	mu        sync.Mutex
+	list      map[int][]int
+	nextID    int
 }
 
 func (l *RemoteList) HandleErr(err error) {
@@ -21,53 +22,64 @@ func (l *RemoteList) HandleErr(err error) {
 	}
 }
 
-func (l *RemoteList) CreateLogFile(_ *struct{}, reply *bool) error {
+func (l *RemoteList) startSnapshotRoutine(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	go func() {
+		for range ticker.C {
+			_ = l.SaveSnapshot()
+		}
+	}()
+}
+
+func (l *RemoteList) SaveSnapshot() error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-
-	fmt.Printf("Creating log file...")
-	fileName := "log.json"
-	path := fmt.Sprintf("%s/%s", l.file_path, fileName)	
 
 	data, err := json.MarshalIndent(l.list, "", "	")
 	l.HandleErr(err)
 
+	fmt.Printf("Saving snapshot file...")
+	fileName := "data.json"
+	path := fmt.Sprintf("%s/%s", l.file_path, fileName)
 	err = os.WriteFile(path, data, 0644)
 	l.HandleErr(err)
 
 	fmt.Printf("Saved list to file: %s\n", path)
-	*reply = true
-	return nil
+	return err
 }
 
-func (l *RemoteList) ReadLogFile() {
-	fmt.Println("Creating log file...")
-	fileName := "log.json"
+func (l *RemoteList) LoadSnapshot() error {
+	fmt.Println("Loading snapshot file...")
+	fileName := "data.json"
 	path := fmt.Sprintf("%s/%s", l.file_path, fileName)
-	
-	if _, err := os.Stat(path); err == nil {
-		data, err := os.ReadFile(path)
-		l.HandleErr(err)
 
-		l.mu.Lock()
-		defer l.mu.Unlock()
-
-		err = json.Unmarshal(data, &l.list)
-		l.HandleErr(err)
-
-		l.size = uint32(len(l.list))
-
-		fmt.Println("Successfully loaded list from file:")
-		fmt.Println(l.list)
-	} else if errors.Is(err, os.ErrNotExist) {
-		data, err := json.MarshalIndent(l.list, "", "	")
-		l.HandleErr(err)
-
-		err = os.WriteFile(path, data, 0644)
-		l.HandleErr(err)
-		fmt.Printf("Created list on file: %s\n", path)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		l.list = make(map[int][]int)
+		return nil
 	}
 
+	data, err := os.ReadFile(path)
+	l.HandleErr(err)
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	err = json.Unmarshal(data, &l.list)
+	l.HandleErr(err)
+
+	maxID := 0
+
+	for id := range l.list {
+		if id >= maxID {
+			maxID = id + 1
+		}
+	}
+
+	l.nextID = maxID
+
+	fmt.Println("Successfully loaded list from file:")
+	fmt.Println(l.list)
+	return nil
 }
 
 func (l *RemoteList) CreateList(_ *struct{}, reply *bool) error {
@@ -75,40 +87,39 @@ func (l *RemoteList) CreateList(_ *struct{}, reply *bool) error {
 	defer l.mu.Unlock()
 
 	new_list := []int{}
-	l.list = append(l.list, new_list)
-	l.size++
+	l.list[l.nextID] = new_list
+	l.nextID++
 
 	fmt.Println(l.list)
 	*reply = true
 	return nil
 }
 
-func (l *RemoteList) RemoveList( Index int, reply *[]int) error {
+func (l *RemoteList) RemoveList(Index int, reply *[]int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if Index < 0 || Index >= len(l.list) {
-		return errors.New("index out of range")
+	_, exists := l.list[Index]
+
+	if !exists {
+		return errors.New("list with supplied id does not exist in records")
 	}
 
-	if l.size > 0 {
-		*reply = l.list[Index]
-		l.list = append(l.list[:Index], l.list[Index + 1:]...)
-		l.size--
-		fmt.Println(l.list)
-	} else {
-		return errors.New("empty list")
-	}
+	*reply = l.list[Index]
+	delete(l.list, Index)
+
+	fmt.Println(l.list)
 	return nil
 }
-
 
 func (l *RemoteList) Get(args *GetArgs, reply *int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if args.ListID < 0 || args.ListID >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", args.ListID)
+	_, exists := l.list[args.ListID]
+
+	if !exists {
+		return errors.New("list with supplied id does not exist in records")
 	}
 
 	if args.Index < 0 || args.Index >= len(l.list[args.ListID]) {
@@ -124,14 +135,17 @@ func (l *RemoteList) Append(args *AppendArgs, reply *bool) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if args.ListID < 0 || args.ListID >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", args.ListID)
+	_, exists := l.list[args.ListID]
+
+	if !exists {
+		return errors.New("list with supplied id does not exist in records")
 	}
 
 	sub_list := l.list[args.ListID]
-
 	l.list[args.ListID] = append(sub_list, args.Value)
+
 	fmt.Println(l.list)
+
 	*reply = true
 	return nil
 }
@@ -140,8 +154,10 @@ func (l *RemoteList) Remove(ListID int, reply *int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if ListID < 0 || ListID >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", ListID)
+	_, exists := l.list[ListID]
+
+	if !exists {
+		return errors.New("list with supplied id does not exist in records")
 	}
 
 	sub_list := l.list[ListID]
@@ -149,7 +165,9 @@ func (l *RemoteList) Remove(ListID int, reply *int) error {
 	if len(sub_list) > 0 {
 		*reply = sub_list[len(sub_list)-1]
 		l.list[ListID] = sub_list[:len(sub_list)-1]
+
 		fmt.Println(l.list)
+
 	} else {
 		return errors.New("empty list")
 	}
@@ -160,8 +178,10 @@ func (l *RemoteList) Size(ListID int, reply *int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if ListID < 0 || ListID >= len(l.list) {
-		return fmt.Errorf("index %d out of list range", ListID)
+	_, exists := l.list[ListID]
+
+	if !exists {
+		return errors.New("list with supplied id does not exist in records")
 	}
 
 	*reply = len(l.list[ListID])
@@ -172,7 +192,12 @@ func (l *RemoteList) Size(ListID int, reply *int) error {
 func NewRemoteList() *RemoteList {
 	l := &RemoteList{
 		file_path: "./src",
+		list:      make(map[int][]int),
+		nextID:    0,
 	}
-	l.ReadLogFile()
+	if err := l.LoadSnapshot(); err != nil {
+		fmt.Printf("Failed to load snapshot: %v", err)
+	}
+	l.startSnapshotRoutine(5 * time.Minute)
 	return l
 }

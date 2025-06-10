@@ -29,11 +29,8 @@ func main() {
 
 	fmt.Println("Resgatando valores...")
 	val = client.Get(0, 0)
-	fmt.Println("Get[0][0]:", val)
 	val = client.Get(0, 1)
-	fmt.Println("Get[0][1]:", val)
 	val = client.Get(1, 0)
-	fmt.Println("Get[1][0]:", val)
 
 
 	fmt.Println("\nTestando tamanho...")
@@ -45,8 +42,6 @@ func main() {
 
 	fmt.Println("\nRetirando último elemento da lista 0...")
 	val = client.Remove(0)
-	fmt.Println("Valor:", val)
 	fmt.Println("\nRetirando último elemento da lista 1...")
 	val = client.Remove(1)
-	fmt.Println("Valor:", val)
 }
