@@ -49,8 +49,4 @@ func main() {
 	fmt.Println("\nRetirando último elemento da lista 1...")
 	val = client.Remove(1)
 	fmt.Println("Valor:", val)
-
-
-	fmt.Println("\nSalvando...")
-	client.CreateLogFile()
 }

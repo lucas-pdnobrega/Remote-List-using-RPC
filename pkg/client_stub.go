@@ -5,15 +5,6 @@ import (
 	"net/rpc"
 )
 
-type RemoteListStub interface {
-	CreateList()
-	RemoveList(Index int)
-	Get(ListID int, Index int)
-	Append(ListID int, Value int)
-	Remove(ListID int)
-	Size(ListID int)
-	CreateLogFile()
-}
 
 type ClientStub struct {
 	client *rpc.Client
@@ -78,10 +69,4 @@ func (c *ClientStub) Size(ListID int) int {
 	_ = c.client.Call("RemoteList.Size", ListID, &val)
 	fmt.Println("Valor:", val)
 	return val
-}
-
-func (c *ClientStub) CreateLogFile() {
-	var val int
-	_ = c.client.Call("RemoteList.CreateLogFile", &Void{}, &val)
-	fmt.Println("Valor:", val)
 }
