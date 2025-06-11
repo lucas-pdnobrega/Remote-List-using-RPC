@@ -4,49 +4,74 @@ import (
 	"fmt"
 	"remotelist/pkg"
 	"sync"
+	"time"
 )
 
 func main() {
 	client := remotelist.NewClientStub()
 	var wg sync.WaitGroup
 
-	fmt.Println("Inicializando listas...")
-	client.CreateList()
-	client.CreateList()
-
-	fmt.Println("Iniciando testes concorrentes...")
-
-	// Teste concorrente: múltiplos appends simultâneos
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go func(v int) {
-			defer wg.Done()
-			client.Append(0, v)
-		}((i + 1) * 10)
+	fmt.Println("Creating initial lists...")
+	for i := 0; i < 3; i++ {
+		client.CreateList()
 	}
 
-	// Teste concorrente: múltiplos gets simultâneos (depois de um pequeno delay)
 	for i := 0; i < 5; i++ {
+		client.Append(0, i+1)
+	}
+
+	fmt.Println("Running concurrency edge tests...")
+
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
-		go func(index int) {
+		go func(id, value int) {
 			defer wg.Done()
-			val := client.Get(0, index)
-			fmt.Printf("[GET] Valor na posição %d: %d\n", index, val)
+			client.Append(id, value)
+		}(i%5, (i+1)*10) // some ids like 3,4 won't exist initially
+	}
+
+	for i := -1; i <= 6; i++ {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			client.Get(0, idx)
 		}(i)
 	}
 
-	// Teste concorrente: múltiplos Size
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			client.Remove(id)
+		}(i) // id 3 may not exist
+	}
+
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			client.RemoveList(id)
+		}(i)
+	}
+
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			client.Size(id)
+		}(i)
+	}
+
+	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			size := client.Size(0)
-			fmt.Println("[SIZE] Tamanho atual da lista 0:", size)
+			client.CreateList()
 		}()
 	}
 
 	wg.Wait()
-	fmt.Println("\nTestes concorrentes finalizados.")
+	time.Sleep(1 * time.Second)
 
-	client.CreateLogFile()
+	fmt.Println("\nAll concurrency edge case tests completed.")
 }
