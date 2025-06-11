@@ -1,1 +1,14 @@
-null
+{"timestamp":"2025-06-11T00:06:26Z","operation":"CreateList","details":"list with current id 4 created"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"CreateList","details":"list with current id 5 created"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Append","details":"Append operation with supplied id 0 and value 10"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Append","details":"Append operation with supplied id 0 and value 20"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Append","details":"Append operation with supplied id 1 and value 30"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Append","details":"Append operation with supplied id 1 and value 40"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Append","details":"Append operation with supplied id 1 and value 50"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Get","details":"Get operation with supplied id 0"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Get","details":"Get operation with supplied id 0"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Get","details":"Get operation with supplied id 1"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Size","details":"Size operation on list with supplied id 0 successful"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Size","details":"Size operation on list with supplied id 1 successful"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Remove","details":"Remove operation with supplied id 0 successful"}
+{"timestamp":"2025-06-11T00:06:26Z","operation":"Remove","details":"Remove operation with supplied id 1 successful"}

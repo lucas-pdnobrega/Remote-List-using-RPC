@@ -10,4 +10,10 @@ type GetArgs struct {
 	Index  int
 }
 
+type LogEntry struct {
+	Timestamp string `json:"timestamp"`
+	Operation string `json:"operation"`
+	Details   string `json:"details"`
+}
+
 type Void struct{}
