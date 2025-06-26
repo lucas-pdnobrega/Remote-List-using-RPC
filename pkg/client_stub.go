@@ -5,15 +5,14 @@ import (
 	"net/rpc"
 )
 
-
 type ClientStub struct {
 	client *rpc.Client
 	reply bool
 	err error
 }
 
-func NewClientStub() *ClientStub{
-	client, err := rpc.Dial("tcp", ":5000")
+func NewClientStub(serverAddr string) *ClientStub{
+	client, err := rpc.Dial("tcp", serverAddr)
 	if err != nil {
 		fmt.Print("dialing:", err)
 	}

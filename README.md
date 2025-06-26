@@ -39,3 +39,51 @@ State is thusly saved/loaded from a local JSON file (log.json), which supports m
     ```go run .\rpc_client.go```
     ```go run .\rpc_client_concurrent.go```
 
+
+### Docker Usage
+- Build the base Docker image (from repository root)
+    ```
+    docker build -t go-rpc-base -f Dockerfile.base .
+    ```
+
+## Monolithic Execution
+- If running monolithically, build the monolith Docker
+    ```
+    docker build -t rpc-monolith -f Dockerfile.monolith .
+    ```
+
+- After building, run the server image in detached mode
+    ```
+    docker run -d --name my-rpc-app -p 5000:5000 rpc-monolith
+    ```
+
+- After the server is running, execute any of the client commands
+    ```
+    docker exec my-rpc-app ./client
+    ```
+    ```
+    docker exec my-rpc-app ./client_concurrent
+    ```
+
+
+## Microsservice-oriented Execution
+- If running in a microsservice-oriented way, build both the server and client images...
+    ```
+    docker build -t rpc-server -f Dockerfile.server .
+    docker build -t rpc-client -f Dockerfile.client .
+    ```
+
+- Afterwards, create the docker network...
+    ```
+    docker network create --subnet=192.168.27.0/24 prog-dist
+    ```
+
+- Then, run the server container
+    ```
+    docker run -d --name meu-servidor --net prog-dist --ip 192.168.27.2 -p 5000:5000 rpc-server
+    ```
+
+- With the server running, run the client as well, using the container name
+    ```
+    docker run --rm --net prog-dist rpc-client meu-servidor:5000
+    ```

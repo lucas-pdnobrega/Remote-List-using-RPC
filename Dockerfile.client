@@ -1,0 +1,16 @@
+# Dockerfile.client
+FROM go-rpc-base
+
+WORKDIR /app
+
+COPY pkg pkg/
+COPY rpc_client.go .
+COPY rpc_client_concurrent.go .
+
+# Build the client executables
+RUN go mod tidy
+RUN go build -o client ./rpc_client.go
+RUN go build -o client_concurrent ./rpc_client_concurrent.go
+
+# Use CMD to allow executing the client with arguments
+CMD ["./client"]

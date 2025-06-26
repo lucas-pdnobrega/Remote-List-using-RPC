@@ -1,0 +1,16 @@
+# Dockerfile.base
+FROM ubuntu:22.04
+
+WORKDIR /app
+
+# Install necessary dependencies for Go
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:longsleep/golang-backports && \
+    apt-get update && \
+    apt-get install -y golang-go
+
+# PATH
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+RUN go version

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os" // Import os for command-line arguments
 	"remotelist/pkg"
 )
 
@@ -12,7 +13,13 @@ var (
 )
 
 func main() {
-	client := remotelist.NewClientStub()
+	serverAddr := "localhost:5000"
+
+	if len(os.Args) > 1 {
+		serverAddr = os.Args[1]
+	}
+
+	client := remotelist.NewClientStub(serverAddr)
 
 	fmt.Println("Inicializando duas listas...")
 	client.CreateList()

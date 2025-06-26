@@ -1,0 +1,19 @@
+# Dockerfile.server
+FROM go-rpc-base
+WORKDIR /app
+
+COPY pkg pkg/
+COPY rpc_server.go .
+
+# Declare a VOLUME for persistent data
+VOLUME /app/src
+
+# Expose the server port
+EXPOSE 5000
+
+# Build the server executable
+RUN go mod tidy
+RUN go build -o server ./rpc_server.go
+
+# Define ENTRYPOINT for server execution
+ENTRYPOINT ["./server"]

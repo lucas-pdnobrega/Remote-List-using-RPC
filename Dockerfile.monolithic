@@ -1,0 +1,19 @@
+# Dockerfile.monolith
+FROM go-rpc-base
+
+WORKDIR /app
+
+COPY . .
+
+# Declare a VOLUME for persistent data
+VOLUME /app/src/data
+VOLUME /app/src/log.json
+
+# Build server and client executables
+RUN go mod tidy
+RUN go build -o server ./rpc_server.go
+RUN go build -o client ./rpc_client.go
+RUN go build -o client_concurrent ./rpc_client_concurrent.go # Build the concurrent client as well
+
+# Set ENTRYPOINT to run the server by default when the container starts
+ENTRYPOINT ["./server"]
