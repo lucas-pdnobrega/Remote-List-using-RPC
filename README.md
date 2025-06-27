@@ -1,4 +1,4 @@
-### Remote Integer List RPC Service
+## Remote Integer List RPC Service
 This is an experiment in how to use Remote Procedure Calls to access a common 2-dimensional list array service. 
 It allows clients to create, modify, and query lists concurrently over TCP.
 
@@ -11,7 +11,7 @@ It allows clients to create, modify, and query lists concurrently over TCP.
 </p>
 
 
-### Features
+## Features
 - Create and remove integer lists remotely
 
 - Append and remove elements from any list
@@ -29,7 +29,7 @@ The integer lists are saved to and loaded from a JSON file
 The Server exposes RemoteList methods over RPC on TCP port 5000, afterwards Clients connect and consume exposed methods like CreateList, Append, Get, Remove, and Size
 State is thusly saved/loaded from a local JSON file (log.json), which supports multiple clients simultaneously without data races
 
-### Usage
+## Usage
 - Run the server (from repository root)
   
     ```go run .\rpc_server.go```
@@ -40,13 +40,13 @@ State is thusly saved/loaded from a local JSON file (log.json), which supports m
     ```go run .\rpc_client_concurrent.go```
 
 
-### Docker Usage
+## Docker Usage
 - Build the base Docker image (from repository root)
     ```
     docker build -t go-rpc-base -f Dockerfile.base .
     ```
 
-## Monolithic Execution
+### Monolithic Execution
 - If running monolithically, build the monolith Docker
     ```
     docker build -t rpc-monolith -f Dockerfile.monolith .
@@ -66,7 +66,7 @@ State is thusly saved/loaded from a local JSON file (log.json), which supports m
     ```
 
 
-## Microsservice-oriented Execution
+### Microsservice-oriented Execution
 - If running in a microsservice-oriented way, build both the server and client images...
     ```
     docker build -t rpc-server -f Dockerfile.server .

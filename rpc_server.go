@@ -15,7 +15,7 @@ func main() {
 		fmt.Println("Erro ao registrar RemoteList:", err)
 	}
 
-	l, e := net.Listen("tcp", "[localhost]:5000")
+	l, e := net.Listen("tcp", "0.0.0.0:5000")
 	defer l.Close()
 	if e != nil {
 		fmt.Println("listen error:", e)

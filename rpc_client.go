@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os" // Import os for command-line arguments
+	"os"
 	"remotelist/pkg"
 )
 

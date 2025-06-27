@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY pkg pkg/
 COPY rpc_server.go .
+COPY go.mod .
 
 # Declare a VOLUME for persistent data
 VOLUME /app/src

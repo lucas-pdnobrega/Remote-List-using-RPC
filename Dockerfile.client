@@ -6,6 +6,7 @@ WORKDIR /app
 COPY pkg pkg/
 COPY rpc_client.go .
 COPY rpc_client_concurrent.go .
+COPY go.mod .
 
 # Build the client executables
 RUN go mod tidy

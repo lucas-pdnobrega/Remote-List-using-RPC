@@ -5,10 +5,15 @@ import (
 	"remotelist/pkg"
 	"sync"
 	"time"
+	"os"
 )
 
 func main() {
-	client := remotelist.NewClientStub()
+	serverAddr := "localhost:5000"
+	if len(os.Args) > 1 {
+		serverAddr = os.Args[1]
+	}
+	client := remotelist.NewClientStub(serverAddr)
 	var wg sync.WaitGroup
 
 	fmt.Println("Creating initial lists...")
